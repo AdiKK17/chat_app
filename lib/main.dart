@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import './provider/testing_provider.dart';
 import './provider/chat_provider.dart';
 
 //import './pages/home_page.dart';
@@ -17,9 +16,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(
-          value: TestingProvider(),
-        ),
         ChangeNotifierProvider.value(
           value: ChatProvider(),
         ),

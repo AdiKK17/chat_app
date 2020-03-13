@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../provider/chat_provider.dart';
 import 'chat_page.dart';
+import 'info_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -41,15 +42,16 @@ class _HomePage extends State<HomePage> {
       }
     });
 
-
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         if (i % 2 == 0) {
           print("onMessage: $message");
-          final notification = message['notification'];
+          final notification = message['data'];
           setState(() {
-            Provider.of<ChatProvider>(context, listen: false)
-                .sendMessages(notification["title"], notification["body"]);
+            Provider.of<ChatProvider>(context, listen: false).sendMessages(
+                notification["title"],
+                notification["body"],
+                notification["topic"]);
           });
         }
         i++;
@@ -58,8 +60,10 @@ class _HomePage extends State<HomePage> {
         print("onLaunch: $message");
         final notification = message['data'];
         setState(() {
-          Provider.of<ChatProvider>(context, listen: false)
-              .sendMessages(notification["title"], notification["body"]);
+          Provider.of<ChatProvider>(context, listen: false).sendMessages(
+              notification["title"],
+              notification["body"],
+              notification["topic"]);
         });
       },
       onResume: (Map<String, dynamic> message) async {
@@ -67,15 +71,15 @@ class _HomePage extends State<HomePage> {
           print("onResume: $message");
           final notification = message['data'];
           setState(() {
-            Provider.of<ChatProvider>(context, listen: false)
-                .sendMessages(notification["title"], notification["body"]);
+            Provider.of<ChatProvider>(context, listen: false).sendMessages(
+                notification["title"],
+                notification["body"],
+                notification["topic"]);
           });
         }
         i++;
       },
     );
-
-
   }
 
   void addTopic(BuildContext context) {
@@ -85,7 +89,7 @@ class _HomePage extends State<HomePage> {
 
     if (_textController.text != null) {
       Provider.of<ChatProvider>(context, listen: false)
-          .addTopics(_textController.text);
+          .addTopic(_textController.text);
       _firebaseMessaging.subscribeToTopic(_textController.text);
       _textController.text = "";
     }
@@ -99,10 +103,10 @@ class _HomePage extends State<HomePage> {
         title: Text("Welcome ${Provider.of<ChatProvider>(context).username}"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.chat),
+            icon: Icon(Icons.info),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ChatPage(),
+                builder: (context) => InfoPage(),
               ),
             ),
           )
@@ -115,22 +119,22 @@ class _HomePage extends State<HomePage> {
           children: <Widget>[
             TextFormField(
               controller: _textController,
-              decoration: InputDecoration(labelText: 'Topic'),
+              decoration: InputDecoration(labelText: 'Username'),
               validator: (String value) {
                 if (value.isEmpty) {
-                  return 'Please enter a topic';
+                  return 'Please enter a Username';
                 }
                 return null;
               },
             ),
             RaisedButton(
               onPressed: () => addTopic(context),
-              child: Text("Add Topic"),
+              child: Text("Add UserName"),
             ),
             SizedBox(
               height: 25,
             ),
-            Text("Subscribed Topics"),
+            Text("Usernames"),
             SizedBox(
               height: 10,
             ),
@@ -142,28 +146,43 @@ class _HomePage extends State<HomePage> {
                       children: <Widget>[
                         Divider(),
                         ListTile(
-                          onTap: () =>
-                              Provider.of<ChatProvider>(context, listen: false)
-                                  .setCurrentTopic(Provider.of<ChatProvider>(
-                                          context,
-                                          listen: false)
-                                      .subscribedTopics[index]),
+                          onTap: () {
+                            Provider.of<ChatProvider>(context, listen: false)
+                                .setCurrentTopic(Provider.of<ChatProvider>(
+                                        context,
+                                        listen: false)
+                                    .subscribedTopics[index]);
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ChatPage(index),
+                              ),
+                            );
+                          },
                           leading: Text(
                             Provider.of<ChatProvider>(context)
                                 .subscribedTopics[index],
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 24),
                           ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
+                          trailing:
                               Provider.of<ChatProvider>(context, listen: false)
-                                  .deleteTopics(index);
-                              _firebaseMessaging.unsubscribeFromTopic(
-                                  Provider.of<ChatProvider>(context)
-                                      .subscribedTopics[index]);
-                            },
-                          ),
+                                          .subscribedTopics[index] ==
+                                      Provider.of<ChatProvider>(context,
+                                              listen: false)
+                                          .username
+                                  ? Container(width: 1,)
+                                  : IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        _firebaseMessaging.unsubscribeFromTopic(
+                                            Provider.of<ChatProvider>(context,listen: false)
+                                                .subscribedTopics[index]);
+                                        Provider.of<ChatProvider>(context,
+                                                listen: false)
+                                            .deleteTopics(index);
+                                      },
+                                    ),
                         ),
                       ],
                     ),

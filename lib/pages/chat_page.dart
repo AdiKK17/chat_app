@@ -9,6 +9,11 @@ import '../provider/chat_provider.dart';
 import '../helper/messaging.dart';
 
 class ChatPage extends StatefulWidget {
+
+  final int chatIndex;
+
+  ChatPage(this.chatIndex);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -17,6 +22,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPage extends State<ChatPage> {
+
   final Map<String, dynamic> _messageData = {
     "message": null,
   };
@@ -90,7 +96,7 @@ class _ChatPage extends State<ChatPage> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("Chat: ${Provider.of<ChatProvider>(context).currentTopic}"),
+        title: Text("Chat: ${Provider.of<ChatProvider>(context).chatMessages[widget.chatIndex].username}"),
       ),
       body: Container(
         child: Column(
@@ -100,8 +106,8 @@ class _ChatPage extends State<ChatPage> {
                 itemBuilder: (context, index) {
                   return Column(
                     crossAxisAlignment: Provider.of<ChatProvider>(context)
-                                .chatMessages[index]
-                                .username !=
+                                .chatMessages[widget.chatIndex]
+                                .messages[index].username !=
                             Provider.of<ChatProvider>(context).username
                         ? CrossAxisAlignment.start
                         : CrossAxisAlignment.end,
@@ -128,8 +134,8 @@ class _ChatPage extends State<ChatPage> {
                               children: <Widget>[
                                 Text(
                                   Provider.of<ChatProvider>(context)
-                                      .chatMessages[index]
-                                      .username,
+                                      .chatMessages[widget.chatIndex]
+                                      .messages[index].username,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontStyle: FontStyle.italic),
@@ -139,16 +145,16 @@ class _ChatPage extends State<ChatPage> {
                                   height: 9,
                                 ),
                                 Text(Provider.of<ChatProvider>(context)
-                                    .chatMessages[index]
-                                    .message),
+                                    .chatMessages[widget.chatIndex]
+                                    .messages[index].message),
                                 SizedBox(
                                   height: 5,
                                 ),
                                 Text(
                                   DateFormat("H:mm").format(
                                     Provider.of<ChatProvider>(context)
-                                        .chatMessages[index]
-                                        .dateTime,
+                                        .chatMessages[widget.chatIndex]
+                                        .messages[index].dateTime,
                                   ),
                                 )
                               ],
@@ -160,7 +166,7 @@ class _ChatPage extends State<ChatPage> {
                   );
                 },
                 itemCount:
-                    Provider.of<ChatProvider>(context).chatMessages.length,
+                    Provider.of<ChatProvider>(context).chatMessages[widget.chatIndex].messages.length,
               ),
             ),
             Form(

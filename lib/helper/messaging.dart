@@ -11,22 +11,23 @@ class Messaging {
   static const String serverKey =
       'AAAAaqFLZhE:APA91bES4a15eDLxN1QzDHN1pi5BzUqbMlLsvxNElmTdIb8Nk1mCwfd841LF-Z4Wj0EeW0yq9ekrtCb8roNHxFJVqv4grYW_Km5wjNZdDbF4XouHwjslDGNzfEE9jExfW45L_-D45QTa';
 
-  static Future<Response> sendToAll({
-    @required String title,
-    @required String body,
-  }) =>
-      sendToTopic(title: title, body: body, topic: 'all');
+//  static Future<Response> sendToAll({
+//    @required String title,
+//    @required String body,
+//  }) =>
+//      sendToTopic(title: title, body: body, topic: 'all');
 
   static Future<Response> sendToTopic(
       {@required String title,
         @required String body,
         @required String topic}) =>
-      sendTo(title: title, body: body, fcmToken: '/topics/$topic');
+      sendTo(title: title, body: body, fcmToken: '/topics/$topic',topic: topic);
 
   static Future<Response> sendTo({
     @required String title,
     @required String body,
     @required String fcmToken,
+    @required String topic,
   }) =>
       client.post(
         'https://fcm.googleapis.com/fcm/send',
@@ -39,6 +40,7 @@ class Messaging {
             'status': 'done',
             "body": '$body',
             "title": '$title',
+            "topic": '$topic',
           },
           'to': '$fcmToken',
         }),

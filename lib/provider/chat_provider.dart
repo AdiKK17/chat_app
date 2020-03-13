@@ -9,10 +9,10 @@ class ChatProvider extends ChangeNotifier{
 
   var _userName = "";
 
-  var _currentTopic = "al";
+  var _currentTopic;
 
-  final List<Message> _chatMessages = [];
-  List<String> _subscribedTopics = ["al"];
+  final List<Chat> _chatMessages = [];
+  List<String> _subscribedTopics = [];
 
   String get username{
     return _userName;
@@ -35,7 +35,7 @@ class ChatProvider extends ChangeNotifier{
     setUserName(name);
   }
 
-  List<Message> get chatMessages {
+  List<Chat> get chatMessages {
     return List.from(_chatMessages);
   }
 
@@ -51,6 +51,7 @@ class ChatProvider extends ChangeNotifier{
   void setUserName(String name) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("username", name);
+    addTopic(name);
   }
 
   Future<bool> NamedOrNot() async {
@@ -63,16 +64,17 @@ class ChatProvider extends ChangeNotifier{
     return true;
   }
 
-  void addTopics(String topic) async {
-
+  void addTopic(String topic) async {
     final prefs = await SharedPreferences.getInstance();
+
     if(prefs.getStringList("topicList") != null){
       _subscribedTopics = prefs.getStringList("topicList");
     }
+
     _subscribedTopics.add(topic);
     prefs.setStringList("topicList", _subscribedTopics);
-
     notifyListeners();
+    addChat(topic);
  }
 
  void deleteTopics(int index) async {
@@ -84,8 +86,8 @@ class ChatProvider extends ChangeNotifier{
 
    _subscribedTopics.removeAt(index);
    prefs.setStringList("topicList", _subscribedTopics);
-
     notifyListeners();
+    deleteChat(index);
  }
 
  void setTopics() async {
@@ -94,14 +96,35 @@ class ChatProvider extends ChangeNotifier{
    if(prefs.getStringList("topicList") != null){
      _subscribedTopics = prefs.getStringList("topicList");
    }
-   prefs.setStringList("topicList", _subscribedTopics);
 
+   prefs.setStringList("topicList", _subscribedTopics);
    notifyListeners();
+   setChats();
  }
 
-  void sendMessages(String name,String message){
+  void deleteChat(int index){
+    _chatMessages.removeAt(index);
+    notifyListeners();
+  }
+
+  void addChat(String name){
+    _chatMessages.add(Chat(messages: [], username: name));
+    notifyListeners();
+  }
+
+  void setChats(){
+    _subscribedTopics.forEach((topic){
+      _chatMessages.add(Chat(messages: [], username: topic));
+    });
+    notifyListeners();
+  }
+
+  void sendMessages(String name,String message,String topic){
+
+    var requiredChat = _chatMessages.firstWhere((chat) => chat.username == topic,orElse: () => null);
     final Message textMessage = Message(username: name,message: message,dateTime: DateTime.now());
-    _chatMessages.add(textMessage);
+
+    requiredChat.messages.add(textMessage);
     notifyListeners();
   }
 

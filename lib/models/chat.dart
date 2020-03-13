@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-class Chat{
-  final String message;
-  final DateTime datetime;
-  bool sender;
+import 'message.dart';
 
-  Chat({@required this.message,@required this.datetime,this.sender = true});
+class Chat{
+
+  final String username;
+  final List<Message> messages;
+
+  Chat({@required this.messages,@required this.username});
 }
